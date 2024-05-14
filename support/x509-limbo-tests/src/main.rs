@@ -122,11 +122,6 @@ fn main() {
         .par_iter()
         .map(|tc| {
             let id = tc.id.as_str();
-            // Filter out computationally intensive test cases
-            // TODO(baloo): Those should be rejected by certval itself.
-            if PATHOLOGICAL_CHECKS.contains(&id) {
-                return TestcaseResult::skip(tc, "computatinally intensive test case");
-            }
 
             let start = Instant::now();
             let out = evaluate_testcase(tc);
@@ -191,10 +186,6 @@ fn main() {
         WEAK_KEY_CHECKS.len()
     );
     eprintln!("- {} were skipped as a bug to be fixed.", BUG.len());
-    eprintln!(
-        "- {} were skipped as pathological cases that need attention.",
-        PATHOLOGICAL_CHECKS.len()
-    );
     eprintln!(
         "- {} were skipped as unsupported application-level checks.",
         UNSUPPORTED_APPLICATION_CHECK.len()
