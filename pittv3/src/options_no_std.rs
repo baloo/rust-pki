@@ -63,15 +63,12 @@ pub fn options_no_std(args: &Pittv3Args) {
     }
 
     let ta_cbor = include_bytes!("../resources/ta.cbor");
-    let mut ta_store = match TaSource::new_from_cbor(ta_cbor) {
+    let ta_store = match TaSource::new_from_cbor(ta_cbor) {
         Ok(ta_store) => ta_store,
         Err(e) => {
             panic!("Failed to parse embedded TA CBOR with: {}", e)
         }
     };
-    if let Err(e) = ta_store.initialize() {
-        panic!("Failed to initialize TA source with: {}", e)
-    }
 
     let ee_cbor = include_bytes!("../resources/ee.cbor");
     let ee_bap: BuffersAndPaths = match from_reader(ee_cbor.as_slice()) {

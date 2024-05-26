@@ -103,15 +103,12 @@ pub fn options_std_app(args: &Pittv3Args) {
     }
 
     let ta_cbor = include_bytes!("../resources/ta.cbor");
-    let mut ta_store = match TaSource::new_from_cbor(ta_cbor) {
+    let ta_store = match TaSource::new_from_cbor(ta_cbor) {
         Ok(ta_store) => ta_store,
         Err(e) => {
             panic!("Failed to parse embedded TA CBOR with: {}", e)
         }
     };
-    if let Err(e) = ta_store.initialize() {
-        panic!("Failed to initialize TA source with: {}", e)
-    }
 
     let mut pe = PkiEnvironment::default();
     pe.populate_5280_pki_environment();

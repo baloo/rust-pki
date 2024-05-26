@@ -44,10 +44,16 @@ pub async fn build_graph(pe: &PkiEnvironment, cps: &CertificationPathSettings) -
     let toi = cps.get_time_of_interest();
 
     let mut cert_store = CertSource::new();
+    let mut ta_store = TaSource::new();
     let r = if cps.get_cbor_ta_store() {
-        ta_folder_to_vec(pe, &ca_folder, &mut cert_store, toi)
+        ta_folder_to_vec(pe, &ca_folder, &mut TaSourceWriter::new(&mut ta_store), toi)
     } else {
-        cert_folder_to_vec(pe, &ca_folder, &mut cert_store, toi)
+        cert_folder_to_vec(
+            pe,
+            &ca_folder,
+            &mut CertSourceWriter::new(&mut cert_store),
+            toi,
+        )
     };
     if let Err(e) = r {
         error!(
@@ -94,7 +100,7 @@ pub async fn build_graph(pe: &PkiEnvironment, cps: &CertificationPathSettings) -
                 pe,
                 &uris,
                 &download_folder,
-                &mut cert_store,
+                &mut CertSourceWriter::new(&mut cert_store),
                 uris_count,
                 &mut lmm,
                 &mut blocklist,

@@ -209,18 +209,15 @@ pub async fn options_std(args: &Pittv3Args) {
         // Load up the trust anchors. This occurs once and is not effected by the dynamic_build flag.
         if let Some(ta_folder) = &args.ta_folder {
             let mut ta_store = TaSource::new();
-            let r = ta_folder_to_vec(&pe, ta_folder, &mut ta_store, args.time_of_interest);
+            let r = ta_folder_to_vec(
+                &pe,
+                ta_folder,
+                &mut TaSourceWriter::new(&mut ta_store),
+                args.time_of_interest,
+            );
             if let Err(e) = r {
                 println!(
                     "Failed to load trust anchors from {} with error {:?}",
-                    ta_folder, e
-                );
-                return;
-            }
-
-            if let Err(e) = ta_store.initialize() {
-                println!(
-                    "Failed to initialize trust anchor source from {} with error {:?}",
                     ta_folder, e
                 );
                 return;
@@ -232,15 +229,7 @@ pub async fn options_std(args: &Pittv3Args) {
         #[cfg(feature = "webpki")]
         if args.webpki_tas {
             match TaSource::new_from_webpki() {
-                Ok(mut ta_store) => {
-                    if let Err(e) = ta_store.initialize() {
-                        println!(
-                            "Failed to initialize trust anchor source from webpki-roots with error {:?}",
-                            e
-                        );
-                        return;
-                    }
-
+                Ok(ta_store) => {
                     ta_store.log_tas();
                 }
                 Err(e) => {
@@ -323,17 +312,15 @@ pub async fn options_std(args: &Pittv3Args) {
         let mut ta_store = TaSource::new();
 
         if let Some(ta_folder) = &args.ta_folder {
-            let r = ta_folder_to_vec(&pe, ta_folder, &mut ta_store, args.time_of_interest);
+            let r = ta_folder_to_vec(
+                &pe,
+                ta_folder,
+                &mut TaSourceWriter::new(&mut ta_store),
+                args.time_of_interest,
+            );
             if let Err(e) = r {
                 println!(
                     "Failed to load trust anchors from {} with error {:?}",
-                    ta_folder, e
-                );
-                return;
-            }
-            if let Err(e) = ta_store.initialize() {
-                println!(
-                    "Failed to initialize trust anchor source from {} with error {:?}",
                     ta_folder, e
                 );
                 return;
@@ -390,11 +377,12 @@ pub async fn options_std(args: &Pittv3Args) {
                     let mut blocklist = read_blocklist(blocklist_file);
                     let mut lmm = read_last_modified_map(lmm_file);
 
+                    let mut cert_source = CertSource::default();
                     let r = fetch_to_buffer(
                         &pe,
                         &fresh_uris,
                         download_folder,
-                        &mut CertSource::default(),
+                        &mut CertSourceWriter::new(&mut cert_source),
                         0,
                         &mut lmm,
                         &mut blocklist,
@@ -646,17 +634,15 @@ async fn generate_and_validate(args: &Pittv3Args) {
     // Load up the trust anchors. This occurs once and is not effected by the dynamic_build flag.
     if let Some(ta_folder) = &args.ta_folder {
         let mut ta_store = TaSource::new();
-        let r = ta_folder_to_vec(&pe, ta_folder, &mut ta_store, args.time_of_interest);
+        let r = ta_folder_to_vec(
+            &pe,
+            ta_folder,
+            &mut TaSourceWriter::new(&mut ta_store),
+            args.time_of_interest,
+        );
         if let Err(e) = r {
             println!(
                 "Failed to load trust anchors from {} with error {:?}",
-                ta_folder, e
-            );
-            return;
-        }
-        if let Err(e) = ta_store.initialize() {
-            println!(
-                "Failed to initialize trust anchor source from {} with error {:?}",
                 ta_folder, e
             );
             return;
@@ -768,13 +754,18 @@ async fn generate_and_validate(args: &Pittv3Args) {
                 }
             }
         };
+        let mut cert_source_writer = CertSourceWriter::new(&mut cert_source);
 
         // We don't want to return previously returned paths on subsequent passes through the loop.
         // Since buffers from AIA/SIA are appended to the cert_source.buffers_and_paths.buffers
         // vector, set a threshold to limit paths returned to the caller when building paths. On
         // first pass, use zero so all paths are available. On subsequent passes, only use paths
         // with at least one index above the length of the buffers vector prior to augmentation.
-        let threshold = if 0 == pass { 0 } else { cert_source.len() };
+        let threshold = if 0 == pass {
+            0
+        } else {
+            cert_source_writer.len()
+        };
 
         // Don't do AIA and SIA chasing on first pass (fresh_uris and uri_threshold will be
         // zero). On subsequent passes, if the number of URIs did not change, then we have
@@ -799,7 +790,7 @@ async fn generate_and_validate(args: &Pittv3Args) {
                     if cert_folder_to_vec(
                         &pe,
                         download_folder,
-                        &mut cert_source,
+                        &mut cert_source_writer,
                         args.time_of_interest,
                     )
                     .is_err()
@@ -814,7 +805,7 @@ async fn generate_and_validate(args: &Pittv3Args) {
                     &pe,
                     &fresh_uris,
                     download_folder,
-                    &mut cert_source,
+                    &mut cert_source_writer,
                     if uri_threshold == 0 {
                         0
                     } else {

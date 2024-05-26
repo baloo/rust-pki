@@ -40,12 +40,12 @@ cfg_if! {
 /// a base to which an index is added before saving via [`save_cert`]. Certificates that are not
 /// valid at the indicated time of interest are discarded as well.
 #[cfg(feature = "remote")]
-fn save_certs_from_p7(
+fn save_certs_from_p7<'a, CV: CertVectorWriter<'a>>(
     pe: &PkiEnvironment,
     filename: &Path,
     bytes: &[u8],
     target: &str,
-    buffers: &mut dyn CertVector,
+    buffers: &mut CV,
     time_of_interest: u64,
 ) -> bool {
     let mut at_least_one_saved = false;
@@ -70,7 +70,7 @@ fn save_certs_from_p7(
                                 return false;
                             };
                             if let Ok(enccert) = a.to_der() {
-                                if save_cert(
+                                if save_cert::<CV>(
                                     pe,
                                     &pb,
                                     enccert.as_slice(),
@@ -97,12 +97,12 @@ fn save_certs_from_p7(
 /// and it is not present in `buffers`, then it is appended to `buffers` and written to `filename`. The
 /// file write is best effort. If it fails, life goes on.
 #[cfg(feature = "remote")]
-fn save_cert(
+fn save_cert<'a, CV: CertVectorWriter<'a>>(
     pe: &PkiEnvironment,
     filename: &Path,
     bytes: &[u8],
     target: &str,
-    buffers: &mut dyn CertVector,
+    buffers: &mut CV,
     time_of_interest: u64,
 ) -> bool {
     let mut saved = false;
@@ -171,11 +171,11 @@ fn save_cert(
 /// to discard certificates that are not time valid at the time of interest.
 #[allow(clippy::too_many_arguments)]
 #[cfg(feature = "remote")]
-pub async fn fetch_to_buffer(
+pub async fn fetch_to_buffer<'a, CV: CertVectorWriter<'a>>(
     pe: &PkiEnvironment,
     uris: &[String],
     folder: &str,
-    buffers: &mut dyn CertVector,
+    buffers: &mut CV,
     start_index: usize,
     last_mod_map: &mut BTreeMap<String, String>,
     blocklist: &mut Vec<String>,

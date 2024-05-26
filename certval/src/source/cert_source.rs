@@ -33,6 +33,7 @@ use alloc::{
     string::{String, ToString},
 };
 use alloc::{format, vec, vec::Vec};
+use core::ops::Deref;
 
 use log::{debug, error, info};
 
@@ -435,17 +436,41 @@ impl CertVector for CertSource {
     fn contains(&self, cert: &CertFile) -> bool {
         self.buffers_and_paths.buffers.contains(cert)
     }
-    fn push(&mut self, cert: CertFile) {
-        if !self.buffers_and_paths.buffers.contains(&cert) {
-            self.buffers_and_paths.buffers.push(cert)
-        }
-    }
     fn len(&self) -> usize {
         self.buffers_and_paths.buffers.len()
     }
 
     fn is_empty(&self) -> bool {
         self.buffers_and_paths.buffers.is_empty()
+    }
+}
+
+/// Writer to [`CertSource`]
+pub struct CertSourceWriter<'a> {
+    inner: &'a mut CertSource,
+}
+
+impl<'a> CertSourceWriter<'a> {
+    /// Creates a new [`CertSourceWriter`]
+    pub fn new(inner: &'a mut CertSource) -> Self {
+        Self { inner }
+    }
+}
+
+impl<'a> CertVectorWriter<'a> for CertSourceWriter<'a> {
+    type Inner = CertSource;
+
+    fn push(&mut self, cert: CertFile) {
+        if !self.inner.buffers_and_paths.buffers.contains(&cert) {
+            self.inner.buffers_and_paths.buffers.push(cert)
+        }
+    }
+}
+
+impl<'a> Deref for CertSourceWriter<'a> {
+    type Target = CertSource;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
     }
 }
 

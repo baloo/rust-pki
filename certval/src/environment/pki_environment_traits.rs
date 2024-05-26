@@ -3,6 +3,7 @@
 //! certification paths.
 
 use alloc::{string::String, vec::Vec};
+use core::ops::Deref;
 
 use der::asn1::ObjectIdentifier;
 use spki::{AlgorithmIdentifierOwned, SubjectPublicKeyInfoOwned};
@@ -97,12 +98,19 @@ pub trait TrustAnchorSource {
 pub trait CertVector {
     /// Returns true if cert is already present and false otherwise
     fn contains(&self, cert: &CertFile) -> bool;
-    /// Adds cert to collection
-    fn push(&mut self, cert: CertFile);
     /// Returns number of certs in collection
     fn len(&self) -> usize;
     /// Returns true if len is 0
     fn is_empty(&self) -> bool;
+}
+
+/// Trait for writing to a [`CertVector`]
+pub trait CertVectorWriter<'a>: Deref<Target = Self::Inner> {
+    /// Inner [`CertVector`] where this will write to.
+    type Inner: CertVector;
+
+    /// Adds cert to collection
+    fn push(&mut self, cert: CertFile);
 }
 
 /// The [`CertificateSource`] trait enables trait objects to provide access to certificates backed via

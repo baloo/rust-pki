@@ -40,7 +40,7 @@ use std::fs::File;
 pub fn ta_folder_to_vec(
     pe: &PkiEnvironment,
     tas_dir: &str,
-    tas_vec: &mut dyn CertVector,
+    tas_vec: &mut TaSourceWriter<'_>,
     time_of_interest: u64,
 ) -> Result<usize> {
     cert_or_ta_folder_to_vec(pe, tas_dir, tas_vec, time_of_interest, true)
@@ -59,7 +59,7 @@ pub fn ta_folder_to_vec(
 pub fn cert_folder_to_vec(
     pe: &PkiEnvironment,
     certs_dir: &str,
-    certs_vec: &mut dyn CertVector,
+    certs_vec: &mut CertSourceWriter<'_>,
     time_of_interest: u64,
 ) -> Result<usize> {
     cert_or_ta_folder_to_vec(pe, certs_dir, certs_vec, time_of_interest, false)
@@ -67,10 +67,10 @@ pub fn cert_folder_to_vec(
 
 /// `cert_or_ta_folder_to_vec` is used by [`ta_folder_to_vec`] and [`cert_folder_to_vec`] to recursively traverse
 /// a folder in search of [`Certificate`] or [`TrustAnchorChoice`] objects, as appropriate.
-fn cert_or_ta_folder_to_vec(
+fn cert_or_ta_folder_to_vec<'a, CV: CertVectorWriter<'a>>(
     pe: &PkiEnvironment,
     certsdir: &str,
-    certsvec: &mut dyn CertVector,
+    certsvec: &mut CV,
     time_of_interest: u64,
     collect_tas: bool,
 ) -> Result<usize> {
@@ -88,7 +88,7 @@ fn cert_or_ta_folder_to_vec(
                     if let Some(s) = path.to_str() {
                         if s != certsdir {
                             error!("Recursing {}", path.display());
-                            let r = cert_or_ta_folder_to_vec(
+                            let r = cert_or_ta_folder_to_vec::<CV>(
                                 pe,
                                 s,
                                 certsvec,

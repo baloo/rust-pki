@@ -26,7 +26,7 @@ use alloc::borrow::ToOwned;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
-use core::str;
+use core::{ops::Deref, str};
 use log::{error, info, warn};
 
 use ciborium::from_reader;
@@ -58,7 +58,8 @@ use crate::{
     source::cert_source::CertFile,
     util::error::*,
     util::pdv_utilities::{get_leaf_rdn, name_to_string},
-    BuffersAndPaths, CertVector, PDVCertificate, PDVTrustAnchorChoice, EXTS_OF_INTEREST,
+    BuffersAndPaths, CertVector, CertVectorWriter, PDVCertificate, PDVTrustAnchorChoice,
+    EXTS_OF_INTEREST,
 };
 
 /// `get_subject_public_key_info_from_trust_anchor` returns a reference to the subject public key
@@ -210,16 +211,46 @@ impl CertVector for TaSource {
     fn contains(&self, cert: &CertFile) -> bool {
         self.buffers.contains(cert)
     }
-    fn push(&mut self, cert: CertFile) {
-        if !self.buffers.contains(&cert) {
-            self.buffers.push(cert)
-        }
-    }
     fn len(&self) -> usize {
         self.buffers.len()
     }
     fn is_empty(&self) -> bool {
         self.buffers.is_empty()
+    }
+}
+
+/// Writer for a [`TaSource`]
+pub struct TaSourceWriter<'a> {
+    inner: &'a mut TaSource,
+}
+
+impl<'a> TaSourceWriter<'a> {
+    /// Creates a new writer for [`TaSourceWriter`]
+    pub fn new(inner: &'a mut TaSource) -> Self {
+        Self { inner }
+    }
+}
+
+impl<'a> CertVectorWriter<'a> for TaSourceWriter<'a> {
+    type Inner = TaSource;
+
+    fn push(&mut self, cert: CertFile) {
+        if !self.inner.buffers.contains(&cert) {
+            self.inner.buffers.push(cert)
+        }
+    }
+}
+
+impl<'a> Deref for TaSourceWriter<'a> {
+    type Target = TaSource;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<'a> Drop for TaSourceWriter<'a> {
+    fn drop(&mut self) {
+        self.inner.initialize();
     }
 }
 
@@ -244,12 +275,14 @@ impl TaSource {
             }
         };
 
-        Ok(Self {
+        let mut tas = Self {
             tas: Vec::new(),
             buffers: bap.buffers,
             skid_map: BTreeMap::new(),
             name_map: BTreeMap::new(),
-        })
+        };
+        tas.initialize();
+        Ok(tas)
     }
 
     /// Creates a new TaSource instance from the [TLS_SERVER_ROOTS](https://docs.rs/webpki-roots/0.25.1/webpki_roots/constant.TLS_SERVER_ROOTS.html)
@@ -278,15 +311,14 @@ impl TaSource {
             skid_map: BTreeMap::new(),
             name_map: BTreeMap::new(),
         };
-        tas.initialize()?;
+        tas.initialize();
         Ok(tas)
     }
 
     /// Processes any buffers passed to the instance, i.e., via new_from_cbor
-    pub fn initialize(&mut self) -> Result<()> {
+    fn initialize(&mut self) {
         populate_parsed_ta_vector(&self.buffers, &mut self.tas);
         self.index_tas();
-        Ok(())
     }
 
     /// Returns vector of TAs
@@ -296,7 +328,7 @@ impl TaSource {
 
     /// index_tas builds internally used maps based on key identifiers and names. It must be called
     /// after populating the `tas` and `buffers` fields and before use.
-    pub fn index_tas(&mut self) {
+    fn index_tas(&mut self) {
         for (i, ta) in self.tas.iter().enumerate() {
             let hex_skid = hex_skid_from_ta(ta);
             self.skid_map.insert(hex_skid, i);
@@ -469,8 +501,7 @@ fn get_trust_anchor_test() {
 
     let mut pe = PkiEnvironment::default();
     pe.populate_5280_pki_environment();
-    ta_folder_to_vec(&pe, &ta_store_folder, &mut ta_store, 0).unwrap();
-    ta_store.initialize().unwrap();
+    ta_folder_to_vec(&pe, &ta_store_folder, &mut ta_store.writer(), 0).unwrap();
     pe.add_trust_anchor_source(Box::new(ta_store.clone()));
     let bad = hex!("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD");
     let good = hex!("6C8A94A277B180721D817A16AAF2DCCE66EE45C0");
