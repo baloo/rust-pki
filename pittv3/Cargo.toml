@@ -82,6 +82,7 @@ remote = ["certval/remote", "revocation", "std"]
 pqc = ["pqcrypto-internals", "pqcrypto-dilithium", "pqcrypto-falcon", "pqcrypto-sphincsplus", "pqcrypto", "pqcrypto-traits", "certval/pqc"]
 webpki = ["certval/webpki"]
 sha1_sig = ["rsa"]
+rsa = ["certval/rsa", "dep:rsa"]
 
 [package.metadata.docs.rs]
 all-features = true
