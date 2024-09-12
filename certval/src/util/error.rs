@@ -85,6 +85,8 @@ pub enum PathValidationStatus {
     RevocationStatusNotAvailable,
     /// A configuration error was detected. See textual log output for more details.
     Misconfiguration,
+    /// An End-Identity certificate was self-signed, but it is forbidden
+    SelfSignedEndIdentity,
 }
 
 /// Error type
@@ -126,6 +128,18 @@ pub enum Error {
     /// Error encapsulates an error derived from [std::io::ErrorKind]
     #[cfg(feature = "std")]
     StdIoError(std::io::ErrorKind),
+    /// Failed to obtain lock guard
+    LockGuardError,
+}
+
+impl Error {
+    /// Returns true if the error returned is for an expired certificate
+    pub fn is_certificate_expired_error(&self) -> bool {
+        matches!(
+            self,
+            Self::PathValidation(PathValidationStatus::InvalidNotAfterDate)
+        )
+    }
 }
 
 impl From<der::Error> for Error {
@@ -183,6 +197,7 @@ impl fmt::Display for PathValidationStatus {
                 write!(f, "RevocationStatusNotAvailable")
             }
             PathValidationStatus::Misconfiguration => write!(f, "Misconfiguration"),
+            PathValidationStatus::SelfSignedEndIdentity => write!(f, "SelfSignedEndIdentity"),
         }
     }
 }
@@ -208,6 +223,7 @@ impl fmt::Display for Error {
             Error::ResourceUnchanged => write!(f, "ResourceUnchanged"),
             #[cfg(feature = "std")]
             Error::StdIoError(err) => write!(f, "StdError: {:?}", err),
+            &Error::LockGuardError => write!(f, "LockGuardError"),
         }
     }
 }

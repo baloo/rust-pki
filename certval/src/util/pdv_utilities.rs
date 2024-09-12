@@ -7,10 +7,7 @@ use core::str::FromStr;
 
 use log::{debug, error};
 
-#[cfg(feature = "std")]
 use lazy_static::lazy_static;
-
-#[cfg(feature = "std")]
 use regex::Regex;
 
 use const_oid::db::rfc2256::STATE_OR_PROVINCE_NAME;
@@ -50,18 +47,15 @@ pub fn is_self_signed_with_buffer(
     enc_cert: &[u8],
 ) -> bool {
     match DeferDecodeSigned::from_der(enc_cert) {
-        Ok(defer_cert) => {
-            let r = pe.verify_signature_message(
+        Ok(defer_cert) => pe
+            .verify_signature_message(
                 pe,
                 &defer_cert.tbs_field,
                 cert.signature.raw_bytes(),
                 &cert.tbs_certificate.signature,
                 &cert.tbs_certificate.subject_public_key_info,
-            );
-            //TODO is it worth making metadata a RefCell to save the result of checks like this?
-            //If not, ditch metadata and replace with String field for locator
-            matches!(r, Ok(_e))
-        }
+            )
+            .is_ok(),
         Err(e) => {
             error!(
                 "Failed to defer decode certificate in is_self_signed with: {}",
@@ -329,7 +323,6 @@ pub(crate) const EMAIL_PATTERN: &str =
 
 // TODO implement to support name constraints for no-std
 /// `descended_from_rfc822` returns true if new_name is equal to or descended from prev_name and false otherwise.
-#[cfg(feature = "std")]
 pub fn descended_from_host(prev_name: &Ia5String, cand: &str, is_uri: bool) -> bool {
     let base = prev_name.to_string();
 
@@ -374,7 +367,7 @@ pub fn descended_from_host(prev_name: &Ia5String, cand: &str, is_uri: bool) -> b
 
 // TODO implement to support name constraints for no-std
 /// `is_email` returns true if addr matches the regular expression defined by [`EMAIL_PATTERN`].
-#[cfg(feature = "std")]
+
 pub(crate) fn is_email(addr: &str) -> bool {
     lazy_static! {
         static ref EMAIL_RE: Regex = Regex::new(
@@ -392,7 +385,7 @@ pub(crate) fn is_email(addr: &str) -> bool {
 
 // TODO implement to support name constraints for no-std
 /// `descended_from_rfc822` returns true if new_name is equal to or descended from prev_name and false otherwise.
-#[cfg(feature = "std")]
+
 pub(crate) fn descended_from_rfc822(prev_name: &Ia5String, new_name: &Ia5String) -> bool {
     let cand = new_name.to_string();
     let base = prev_name.to_string();

@@ -40,7 +40,7 @@ use alloc::{vec, vec::Vec};
 
 use der::asn1::ObjectIdentifier;
 use spki::{AlgorithmIdentifierOwned, SubjectPublicKeyInfoOwned};
-use x509_cert::{certificate::Raw, crl::CertificateList};
+use x509_cert::{certificate::Raw, crl::CertificateList, name::Name};
 
 use crate::PathValidationStatus::RevocationStatusNotDetermined;
 use crate::{
@@ -74,34 +74,19 @@ pub struct PkiEnvironment {
     //Storage and retrieval interfaces
     //--------------------------------------------------------------------------
     /// List of trait objects that provide access to trust anchors
-    #[cfg(feature = "std")]
     trust_anchor_sources: Vec<Box<(dyn TrustAnchorSource + Send + Sync)>>,
-    #[cfg(not(feature = "std"))]
-    trust_anchor_sources: Vec<Box<(dyn TrustAnchorSource)>>,
 
     /// List of trait objects that provide access to certificates
-    #[cfg(feature = "std")]
     certificate_sources: Vec<Box<(dyn CertificateSource + Send + Sync)>>,
-    #[cfg(not(feature = "std"))]
-    certificate_sources: Vec<Box<(dyn CertificateSource)>>,
 
     /// List of trait objects that provide access to CRLs
-    #[cfg(feature = "std")]
     crl_sources: Vec<Box<(dyn CrlSource + Send + Sync)>>,
-    #[cfg(not(feature = "std"))]
-    crl_sources: Vec<Box<(dyn CrlSource)>>,
 
     /// List of trait objects that provide access to cached revocation status determinations
-    #[cfg(feature = "std")]
     revocation_cache: Vec<Box<(dyn RevocationStatusCache + Send + Sync)>>,
-    #[cfg(not(feature = "std"))]
-    revocation_cache: Vec<Box<(dyn RevocationStatusCache)>>,
 
     /// List of trait objects that provide access to blocklist and last modified info
-    #[cfg(feature = "std")]
     check_remote: Vec<Box<(dyn CheckRemoteResource + Send + Sync)>>,
-    #[cfg(not(feature = "std"))]
-    check_remote: Vec<Box<(dyn CheckRemoteResource)>>,
 
     //--------------------------------------------------------------------------
     //Miscellaneous interfaces
@@ -245,9 +230,8 @@ impl PkiEnvironment {
         spki: &SubjectPublicKeyInfoOwned,         // public key
     ) -> Result<()> {
         for f in &self.verify_signature_digest_callbacks {
-            let r = f(pe, hash_to_verify, signature, signature_alg, spki);
-            if let Ok(r) = r {
-                return Ok(r);
+            if f(pe, hash_to_verify, signature, signature_alg, spki).is_ok() {
+                return Ok(());
             }
         }
         Err(Error::Unrecognized)
@@ -283,14 +267,7 @@ impl PkiEnvironment {
     }
 
     /// add_trust_anchor_source adds a [`TrustAnchorSource`] object to the list used by get_trust_anchor.
-    #[cfg(feature = "std")]
     pub fn add_trust_anchor_source(&mut self, c: Box<(dyn TrustAnchorSource + Send + Sync)>) {
-        self.trust_anchor_sources.push(c);
-    }
-
-    /// add_trust_anchor_source adds a [`TrustAnchorSource`] object to the list used by get_trust_anchor.
-    #[cfg(not(feature = "std"))]
-    pub fn add_trust_anchor_source(&mut self, c: Box<(dyn TrustAnchorSource)>) {
         self.trust_anchor_sources.push(c);
     }
 
@@ -349,6 +326,27 @@ impl PkiEnvironment {
         Err(Error::Unrecognized)
     }
 
+    /// Retrieves a trust anchor for a given Name
+    pub fn get_trust_anchor_by_name(&'_ self, name: &Name) -> Result<&PDVTrustAnchorChoice> {
+        for f in &self.trust_anchor_sources {
+            if let Ok(r) = f.get_trust_anchor_by_name(name) {
+                return Ok(r);
+            }
+        }
+
+        Err(Error::Unrecognized)
+    }
+
+    /// Retrieves a set of certificates from certificate sources (i.e. intermediate CAs) matching a certain name
+    pub fn get_cert_by_name(&'_ self, name: &Name) -> Vec<&PDVCertificate> {
+        self.certificate_sources.iter().fold(vec![], |mut acc, f| {
+            if let Ok(mut r) = f.get_certificates_for_name(name) {
+                acc.append(&mut r);
+            }
+            acc
+        })
+    }
+
     /// is_cert_a_trust_anchor takes a target certificate indication if cert is a trust anchor.
     pub fn is_cert_a_trust_anchor(&self, target: &PDVCertificate) -> Result<()> {
         for f in &self.trust_anchor_sources {
@@ -370,14 +368,7 @@ impl PkiEnvironment {
     }
 
     /// add_certificate_source adds a [`CertificateSource`] object to the list.
-    #[cfg(feature = "std")]
     pub fn add_certificate_source(&mut self, c: Box<(dyn CertificateSource + Send + Sync)>) {
-        self.certificate_sources.push(c);
-    }
-
-    /// add_certificate_source adds a [`CertificateSource`] object to the list.
-    #[cfg(not(feature = "std"))]
-    pub fn add_certificate_source(&mut self, c: Box<(dyn CertificateSource)>) {
         self.certificate_sources.push(c);
     }
 
@@ -386,21 +377,49 @@ impl PkiEnvironment {
         self.certificate_sources.clear();
     }
 
-    /// add_crl_source adds a [`CrlSource`] object to the list.
-    #[cfg(feature = "std")]
-    pub fn add_crl_source(&mut self, c: Box<(dyn CrlSource + Send + Sync)>) {
-        self.crl_sources.push(c);
+    /// gives all the intermediate certificates
+    pub fn get_intermediates(&self) -> Result<Vec<&PDVCertificate>> {
+        for f in &self.certificate_sources {
+            let r = f.get_certificates();
+            if let Ok(r) = r {
+                return Ok(r);
+            }
+        }
+        Err(Error::Unrecognized)
+    }
+
+    /// Fetches all intermediate certs matching a particular skid
+    pub fn get_intermediates_by_skid(&self, skid: &[u8]) -> Result<Vec<&PDVCertificate>> {
+        for f in &self.certificate_sources {
+            let r = f.get_certificates_for_skid(skid);
+            if let Ok(r) = r {
+                return Ok(r);
+            }
+        }
+        Err(Error::Unrecognized)
     }
 
     /// add_crl_source adds a [`CrlSource`] object to the list.
-    #[cfg(not(feature = "std"))]
-    pub fn add_crl_source(&mut self, c: Box<(dyn CrlSource)>) {
+    pub fn add_crl_source(&mut self, c: Box<(dyn CrlSource + Send + Sync)>) {
         self.crl_sources.push(c);
     }
 
     /// clear_crl_sources clears the list of [`CrlSource`] objects.
     pub fn clear_crl_sources(&mut self) {
         self.crl_sources.clear();
+    }
+
+    /// Retrieves all the CRLs made available by the various [`CrlSource`] objects
+    pub fn get_all_crls(&self) -> Result<Vec<Vec<u8>>> {
+        let mut retval = vec![];
+        for f in &self.crl_sources {
+            let Ok(mut crls) = f.get_all_crls() else {
+                continue;
+            };
+            retval.append(&mut crls);
+        }
+        retval.dedup();
+        Ok(retval)
     }
 
     /// Retrieves CRLs for given certificate from store
@@ -434,14 +453,7 @@ impl PkiEnvironment {
     }
 
     /// add_revocation_cache adds a [`RevocationStatusCache`] object to the list.
-    #[cfg(feature = "std")]
     pub fn add_revocation_cache(&mut self, c: Box<(dyn RevocationStatusCache + Send + Sync)>) {
-        self.revocation_cache.push(c);
-    }
-
-    /// add_revocation_cache adds a [`RevocationStatusCache`] object to the list.
-    #[cfg(not(feature = "std"))]
-    pub fn add_revocation_cache(&mut self, c: Box<(dyn RevocationStatusCache)>) {
         self.revocation_cache.push(c);
     }
 
@@ -487,17 +499,19 @@ impl PkiEnvironment {
         time_of_interest: TimeOfInterest,
     ) -> Result<()> {
         let mut some_valid = false;
+        let mut last_error = Error::Unrecognized;
         for f in &self.certificate_sources {
-            if f.get_paths_for_target(self, target, paths, threshold, time_of_interest)
-                .is_ok()
-            {
-                some_valid = true;
+            match f.get_paths_for_target(self, target, paths, threshold, time_of_interest) {
+                Ok(_) => some_valid = true,
+                Err(e) => {
+                    last_error = e;
+                }
             }
         }
         if some_valid {
             Ok(())
         } else {
-            Err(Error::Unrecognized)
+            Err(last_error)
         }
     }
 
@@ -524,14 +538,7 @@ impl PkiEnvironment {
     }
 
     /// add_check_remote adds a [`CheckRemoteResource`] object to the list.
-    #[cfg(feature = "std")]
     pub fn add_check_remote(&mut self, c: Box<(dyn CheckRemoteResource + Send + Sync)>) {
-        self.check_remote.push(c);
-    }
-
-    /// add_check_remote adds a [`CheckRemoteResource`] object to the list.
-    #[cfg(not(feature = "std"))]
-    pub fn add_check_remote(&mut self, c: Box<(dyn CheckRemoteResource)>) {
         self.check_remote.push(c);
     }
 
