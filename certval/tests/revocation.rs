@@ -199,7 +199,7 @@
 //     }
 // }
 
-#[cfg(all(feature = "revocation", feature = "std"))]
+#[cfg(all(feature = "revocation", feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn stapled_crl_async() {
     use certval::environment::pki_environment::PkiEnvironment;
@@ -280,7 +280,7 @@ async fn stapled_crl_async() {
     }
 }
 
-#[cfg(all(feature = "revocation", feature = "std"))]
+#[cfg(all(feature = "revocation", feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn stapled_mix_async() {
     use certval::environment::pki_environment::PkiEnvironment;
@@ -364,7 +364,7 @@ async fn stapled_mix_async() {
     }
 }
 
-#[cfg(all(feature = "revocation", feature = "std"))]
+#[cfg(all(feature = "revocation", feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn cached_crl_async() {
     use certval::environment::pki_environment::PkiEnvironment;
@@ -446,7 +446,7 @@ async fn cached_crl_async() {
     }
 }
 
-#[cfg(all(feature = "revocation", feature = "std"))]
+#[cfg(all(feature = "revocation", feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn cached_crl_revoked_async() {
     use certval::environment::pki_environment::PkiEnvironment;
@@ -531,7 +531,7 @@ async fn cached_crl_revoked_async() {
     }
 }
 
-#[cfg(all(feature = "revocation", feature = "std"))]
+#[cfg(all(feature = "revocation", feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn cached_crl_revoked_remote_async() {
     use certval::environment::pki_environment::PkiEnvironment;
@@ -616,7 +616,7 @@ async fn cached_crl_revoked_remote_async() {
     }
 }
 
-#[cfg(all(feature = "revocation", feature = "std"))]
+#[cfg(all(feature = "revocation", feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn cached_crl_remote_async() {
     use certval::environment::pki_environment::PkiEnvironment;

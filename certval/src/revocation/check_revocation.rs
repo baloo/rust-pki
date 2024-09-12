@@ -310,7 +310,7 @@ pub fn check_revocation(
 
         if CertificateRevoked == cur_status {
             info!("Determined revocation status (revoked) using cached status for certificate issued to {}", cur_cert_subject);
-            set_validation_status(cpr, revoked_error);
+            cpr.set_validation_status(revoked_error);
             return Err(Error::PathValidation(revoked_error));
         }
 
@@ -416,7 +416,7 @@ pub fn check_revocation(
         cpr.set_validation_status(RevocationStatusNotDetermined);
         Err(Error::PathValidation(RevocationStatusNotDetermined))
     } else {
-        set_validation_status(cpr, Valid);
+        cpr.set_validation_status(Valid);
         Ok(())
     }
 }

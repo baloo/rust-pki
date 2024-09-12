@@ -1199,12 +1199,12 @@ pub(crate) async fn check_revocation_crl_remote(
 
 #[cfg(test)]
 mod tests {
-    use crate::util::Error;
-    use crate::PkiEnvironment;
-
     #[cfg(feature = "remote")]
     #[tokio::test]
     async fn fetch_crl_test() {
+        use crate::util::Error;
+        use crate::PkiEnvironment;
+
         use crate::{
             crl::fetch_crl, CrlSourceFolders, RemoteStatus, RevocationCache, TimeOfInterest,
         };

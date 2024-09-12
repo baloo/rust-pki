@@ -14,6 +14,8 @@ lazy_static! {
     static ref TEST_MUTEX: Mutex<()> = Mutex::new(());
 }
 
+// allowing dead code here since adding rsa gate feels wrong
+#[allow(dead_code)]
 #[cfg(feature = "remote")]
 fn remove_files_from_downloads(f: &str) {
     let _tm = if let Ok(g) = TEST_MUTEX.lock() {
@@ -200,7 +202,7 @@ fn list_partial_paths() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", feature = "rsa"))]
 #[test]
 fn list_partial_paths_for_leaf_ca() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -263,6 +265,7 @@ fn list_partial_paths_for_leaf_ca() -> Result<(), Box<dyn std::error::Error>> {
 //     Ok(())
 // }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn generate_then_validate_one() -> Result<(), Box<dyn std::error::Error>> {
     let p = Path::new("tests/examples/regen1.cbor");
@@ -376,6 +379,7 @@ fn generate_then_validate_one() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn regen_ignore_self_signed() -> Result<(), Box<dyn std::error::Error>> {
     let p = Path::new("tests/examples/regen2.cbor");
@@ -401,6 +405,7 @@ fn regen_ignore_self_signed() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn empty_cbor1() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -460,6 +465,7 @@ fn empty_cbor1() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn empty_cbor2() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -520,6 +526,7 @@ fn empty_cbor2() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn empty_cbor3() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -580,6 +587,7 @@ fn empty_cbor3() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn empty_cbor4() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -636,6 +644,7 @@ fn empty_cbor4() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn absent_cbor1() -> Result<(), Box<dyn std::error::Error>> {
     // same as empty_cbor for validation (minus the cbor option). diagnostics require cbor, so omitted.
@@ -685,6 +694,7 @@ fn absent_cbor1() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn absent_cbor2() -> Result<(), Box<dyn std::error::Error>> {
     // same as empty_cbor for validation (minus the cbor option). diagnostics require cbor, so omitted.
@@ -735,6 +745,7 @@ fn absent_cbor2() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn absent_cbor3() -> Result<(), Box<dyn std::error::Error>> {
     // same as empty_cbor for validation (minus the cbor option). diagnostics require cbor, so omitted.
@@ -784,6 +795,7 @@ fn absent_cbor3() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn absent_cbor4() -> Result<(), Box<dyn std::error::Error>> {
     // same as empty_cbor for validation (minus the cbor option). diagnostics require cbor, so omitted.
@@ -830,6 +842,7 @@ fn absent_cbor4() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn generate_then_validate_skip_expired() -> Result<(), Box<dyn std::error::Error>> {
     let p = Path::new("tests/examples/regen3.cbor");
@@ -1045,6 +1058,7 @@ fn generate_then_validate_skip_expired() -> Result<(), Box<dyn std::error::Error
 //     Ok(())
 // }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn generate_then_validate_with_expired() -> Result<(), Box<dyn std::error::Error>> {
     let p = Path::new("tests/examples/regen5.cbor");
@@ -1281,6 +1295,7 @@ fn generate_then_validate_with_expired() -> Result<(), Box<dyn std::error::Error
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[cfg(all(feature = "webpki", feature = "remote"))]
 #[test]
 fn webpki_test() -> Result<(), Box<dyn std::error::Error>> {
@@ -1358,6 +1373,7 @@ fn bad_input() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn generate_then_validate_with_different_ta_stores() -> Result<(), Box<dyn std::error::Error>> {
     let p = Path::new("tests/examples/regen4.cbor");
@@ -1444,6 +1460,7 @@ fn generate_then_validate_with_different_ta_stores() -> Result<(), Box<dyn std::
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn cleanup_tests() -> Result<(), Box<dyn std::error::Error>> {
     let expired = Path::new("tests/examples/expired.der");
@@ -1503,6 +1520,7 @@ fn cleanup_tests() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn generate_then_validate_with_tls_eku() -> Result<(), Box<dyn std::error::Error>> {
     let p = Path::new("tests/examples/regen6.cbor");
@@ -1562,6 +1580,7 @@ fn generate_then_validate_with_tls_eku() -> Result<(), Box<dyn std::error::Error
     Ok(())
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn pittv3_pkits() -> Result<(), Box<dyn std::error::Error>> {
     use tempfile::tempdir;
