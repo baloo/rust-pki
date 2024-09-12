@@ -136,7 +136,7 @@ async fn pkits_p256() {
     .await;
 }
 
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn pkits_2048() {
     let mut pool = CertPool {
@@ -192,7 +192,7 @@ async fn pkits_2048() {
     }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), feature = "rsa"))]
 #[test]
 fn pkits_2048() {
     let mut pool = CertPool {
@@ -317,7 +317,7 @@ async fn pkits_p256_graph() {
     .await;
 }
 
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", feature = "rsa"))]
 #[tokio::test]
 async fn pkits_2048_graph() {
     let mut pool = CertPool {
@@ -373,7 +373,7 @@ async fn pkits_2048_graph() {
     }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), feature = "rsa"))]
 #[test]
 fn pkits_2048_graph() {
     let mut pool = CertPool {

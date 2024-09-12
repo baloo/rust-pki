@@ -87,7 +87,7 @@ tokio = { version = "1.33.0", features = ["full", "macros", "time", "rt-multi-th
 # webpki can be paired with any other feature and simply adds a means of initializing a TaSource from the webpki-roots crate
 [features]
 default = ["remote", "webpki"]
-revocation = ["dep:ndarray", "serde/std", "serde/rc", "dep:url", "dep:regex"]
+revocation = ["dep:ndarray"]
 std = ["dep:ndarray", "dep:base64ct", "dep:walkdir", "ed25519-dalek/std", "dep:url", "dep:serde_json", "serde/rc",  "flagset/serde", "dep:regex", "lazy_static/spin", "dep:bitvec", "dep:cidr", "der/std"]
 remote = ["revocation", "std", "reqwest", "lazy_static/spin"]
 pqc = ["pqcrypto-internals", "pqcrypto-dilithium", "pqcrypto-falcon", "pqcrypto-sphincsplus", "pqcrypto", "pqcrypto-traits", "pqckeys"]

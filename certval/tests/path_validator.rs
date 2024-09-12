@@ -4,7 +4,7 @@ use certval::environment::pki_environment::PkiEnvironment;
 use certval::path_settings::*;
 use certval::validator::path_validator::*;
 use certval::*;
-use der::{Decode, DecodePem, Encode};
+use der::Decode;
 use x509_cert::*;
 
 use self::certificate::{CertificateInner, Raw};
@@ -30,6 +30,7 @@ fn prehash_required() {
     }
 }
 
+#[cfg(feature = "rsa")]
 #[test]
 fn pkits_test1() {
     let der_encoded_ta = include_bytes!("examples/TrustAnchorRootCertificate.crt");
@@ -183,8 +184,10 @@ fn denies_self_signed_ee() {
     panic!("EE cert was accepted");
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn wire_certchain_works() {
+    use der::{DecodePem, Encode};
     let _ = pretty_env_logger::try_init();
 
     let time_of_interest: TimeOfInterest = TimeOfInterest::from_unix_secs(1707405529).unwrap();
