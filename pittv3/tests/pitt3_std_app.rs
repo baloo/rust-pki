@@ -1,4 +1,4 @@
-#![cfg(not(feature = "std"))]
+#![cfg(all(not(feature = "std"), feature = "rsa"))]
 
 use assert_cmd::prelude::*;
 use std::process::Command;
@@ -6,7 +6,7 @@ use std::process::Command;
 #[cfg(feature = "std_app")]
 use predicates::prelude::*;
 
-#[cfg(all(feature = "std_app", not(feature = "revocation")))]
+#[cfg(all(feature = "std_app", feature = "rsa", not(feature = "revocation")))]
 #[test]
 fn generate_then_validate_one_std_app() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -17,7 +17,7 @@ fn generate_then_validate_one_std_app() -> Result<(), Box<dyn std::error::Error>
     }
     Ok(())
 }
-#[cfg(all(feature = "std_app", feature = "revocation"))]
+#[cfg(all(feature = "std_app", feature = "rsa", feature = "revocation"))]
 #[test]
 fn generate_then_validate_one_std_app() -> Result<(), Box<dyn std::error::Error>> {
     {
