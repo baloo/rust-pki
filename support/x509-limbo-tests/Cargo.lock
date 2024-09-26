@@ -258,7 +258,7 @@ checksum = "6bdf600c45bd958cf2945c445264471cca8b6c8e67bc87b71affd6d7e5682621"
 [[package]]
 name = "cms"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#1b49eb7afc6c23ce403aa3d4d2440864010bd566"
+source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
 dependencies = [
  "const-oid",
  "der",
@@ -688,9 +688,9 @@ dependencies = [
 
 [[package]]
 name = "heck"
-version = "0.5.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
 name = "hermit-abi"
@@ -878,7 +878,7 @@ name = "limbo-harness-support"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "regress 0.10.1",
+ "regress 0.9.1",
  "serde",
  "serde_json",
  "typify",
@@ -1340,9 +1340,9 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "regress"
-version = "0.9.1"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0eae2a1ebfecc58aff952ef8ccd364329abe627762f5bf09ff42eb9d98522479"
+checksum = "4f5f39ba4513916c1b2657b72af6ec671f091cd637992f58d0ede5cae4e5dea0"
 dependencies = [
  "hashbrown",
  "memchr",
@@ -1350,9 +1350,9 @@ dependencies = [
 
 [[package]]
 name = "regress"
-version = "0.10.1"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1541daf4e4ed43a0922b7969bdc2170178bcacc5dabf7e39bc508a9fa3953a7a"
+checksum = "0eae2a1ebfecc58aff952ef8ccd364329abe627762f5bf09ff42eb9d98522479"
 dependencies = [
  "hashbrown",
  "memchr",
@@ -1569,9 +1569,6 @@ name = "semver"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "serde"
@@ -1914,9 +1911,9 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "typify"
-version = "0.1.0"
+version = "0.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adb6beec125971dda80a086f90b4a70f60f222990ce4d63ad0fc140492f53444"
+checksum = "5c61e9db210bbff218e6535c664b37ec47da449169b98e7866d0580d0db75529"
 dependencies = [
  "typify-impl",
  "typify-macro",
@@ -1924,18 +1921,16 @@ dependencies = [
 
 [[package]]
 name = "typify-impl"
-version = "0.1.0"
+version = "0.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93bbb24e990654aff858d80fee8114f4322f7d7a1b1ecb45129e2fcb0d0ad5ae"
+checksum = "95e32f38493804f88e2dc7a5412eccd872ea5452b4db9b0a77de4df180f2a87e"
 dependencies = [
  "heck",
  "log",
  "proc-macro2",
  "quote",
- "regress 0.9.1",
+ "regress 0.8.0",
  "schemars",
- "semver",
- "serde",
  "serde_json",
  "syn",
  "thiserror",
@@ -1944,14 +1939,13 @@ dependencies = [
 
 [[package]]
 name = "typify-macro"
-version = "0.1.0"
+version = "0.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8e6491896e955692d68361c68db2b263e3bec317ec0b684e0e2fa882fb6e31e"
+checksum = "cc09508b72f63d521d68e42c7f172c7416d67986df44b3c7d1f7f9963948ed32"
 dependencies = [
  "proc-macro2",
  "quote",
  "schemars",
- "semver",
  "serde",
  "serde_json",
  "serde_tokenstream",
@@ -2289,7 +2283,7 @@ dependencies = [
 [[package]]
 name = "x509-cert"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#1b49eb7afc6c23ce403aa3d4d2440864010bd566"
+source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
 dependencies = [
  "const-oid",
  "der",
@@ -2300,7 +2294,7 @@ dependencies = [
 [[package]]
 name = "x509-ocsp"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#1b49eb7afc6c23ce403aa3d4d2440864010bd566"
+source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
 dependencies = [
  "const-oid",
  "der",

@@ -141,7 +141,7 @@ impl ExtensionProcessing for PDVCertificate {
             return Ok(pe.get(oid));
         }
 
-        if let Some(exts) = self.decoded_cert.tbs_certificate.extensions.as_ref() {
+        if let Some(exts) = self.decoded_cert.tbs_certificate().extensions().as_ref() {
             if let Some(i) = exts.iter().find(|&ext| ext.extn_id == *oid) {
                 let v = i.extn_value.as_bytes();
                 match *oid {

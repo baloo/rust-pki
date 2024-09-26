@@ -406,7 +406,7 @@ checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
 [[package]]
 name = "cms"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#1b49eb7afc6c23ce403aa3d4d2440864010bd566"
+source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
 dependencies = [
  "const-oid",
  "der",
@@ -2817,7 +2817,7 @@ dependencies = [
 [[package]]
 name = "x509-cert"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#1b49eb7afc6c23ce403aa3d4d2440864010bd566"
+source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
 dependencies = [
  "const-oid",
  "der",
@@ -2827,7 +2827,7 @@ dependencies = [
 [[package]]
 name = "x509-ocsp"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#1b49eb7afc6c23ce403aa3d4d2440864010bd566"
+source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
 dependencies = [
  "const-oid",
  "der",

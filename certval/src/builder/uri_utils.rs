@@ -115,7 +115,7 @@ fn save_cert(
     let r = CertificateInner::from_der(bytes);
     match r {
         Ok(cert) => {
-            if let Err(_e) = valid_at_time(&cert.tbs_certificate, time_of_interest, true) {
+            if let Err(_e) = valid_at_time(cert.tbs_certificate(), time_of_interest, true) {
                 debug!("Ignoring certificate downloaded from {} as not valid at indicated time of interest ({})", target, time_of_interest);
                 return saved;
             }

@@ -224,7 +224,7 @@ impl ExtensionProcessing for PDVTrustAnchorChoice {
         }
 
         let exts = match &self.decoded_ta {
-            TrustAnchorChoice::Certificate(c) => &c.tbs_certificate.extensions,
+            TrustAnchorChoice::Certificate(c) => &c.tbs_certificate().extensions(),
             TrustAnchorChoice::TaInfo(tai) => {
                 if let Some(cp) = &tai.cert_path {
                     // TODO Support all TrustAnchorInfo overrides
@@ -247,7 +247,7 @@ impl ExtensionProcessing for PDVTrustAnchorChoice {
                     }
 
                     if let Some(c) = &cp.certificate {
-                        &c.tbs_certificate.extensions
+                        &c.tbs_certificate().extensions()
                     } else {
                         &None
                     }
@@ -355,7 +355,7 @@ impl ExtensionProcessing for PDVTrustAnchorChoice {
 pub fn get_trust_anchor_name(ta: &TrustAnchorChoice<Raw>) -> Result<&Name> {
     match ta {
         TrustAnchorChoice::Certificate(cert) => {
-            return Ok(&cert.tbs_certificate.subject);
+            return Ok(&cert.tbs_certificate().subject());
         }
         TrustAnchorChoice::TaInfo(tai) => {
             if let Some(cert_path) = &tai.cert_path {
@@ -363,7 +363,7 @@ pub fn get_trust_anchor_name(ta: &TrustAnchorChoice<Raw>) -> Result<&Name> {
             }
         }
         TrustAnchorChoice::TbsCertificate(cert) => {
-            return Ok(&cert.subject);
+            return Ok(&cert.subject());
         }
     }
     Err(Error::NotFound)
