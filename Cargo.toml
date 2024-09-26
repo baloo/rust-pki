@@ -14,9 +14,7 @@ debug = true
 debug = true
 
 [patch.crates-io]
-cms        = { git = "https://github.com/RustCrypto/formats.git" }
 x509-ocsp  = { git = "https://github.com/RustCrypto/formats.git" }
-x509-cert  = { git = "https://github.com/RustCrypto/formats.git" }
 # FIXME: https://github.com/dalek-cryptography/curve25519-dalek/pull/676
 ed25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek.git", branch = "rustcrypto-new-releases" }
 

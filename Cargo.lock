@@ -405,8 +405,9 @@ checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
 
 [[package]]
 name = "cms"
-version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
+version = "0.3.0-pre.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "956098b1603285c33972193d6f62c8389d3d8548693a4077baa08ff0a8da97c7"
 dependencies = [
  "const-oid",
  "der",
@@ -2816,8 +2817,9 @@ dependencies = [
 
 [[package]]
 name = "x509-cert"
-version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
+version = "0.3.0-pre.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2db382aa43c1fb5c419a960f72c3847ab0f383f635fc2e25f0bd6c5fb94371d1"
 dependencies = [
  "const-oid",
  "der",
@@ -2827,7 +2829,7 @@ dependencies = [
 [[package]]
 name = "x509-ocsp"
 version = "0.3.0-pre"
-source = "git+https://github.com/RustCrypto/formats.git#d801da61680eaee6775d5c18921b862b513773f1"
+source = "git+https://github.com/RustCrypto/formats.git#8f1e468a7846c10146986958d6f5f4cbbf6738f2"
 dependencies = [
  "const-oid",
  "der",
