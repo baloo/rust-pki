@@ -265,14 +265,12 @@ impl<'a> ::der::DecodeValue<'a> for DeferDecodeBasicOcspResponse {
         reader: &mut R,
         header: ::der::Header,
     ) -> ::der::Result<Self> {
-        use ::der::Reader as _;
         reader.read_nested(header.length, |reader| {
             let tbs_response_data = reader.tlv_bytes()?;
             let signature_algorithm = reader.tlv_bytes()?;
             let signature = reader.tlv_bytes()?;
-            let certs =
-                ::der::asn1::ContextSpecific::decode_explicit(reader, ::der::TagNumber::N0)?
-                    .map(|cs| cs.value);
+            let certs = ::der::asn1::ContextSpecific::decode_explicit(reader, ::der::TagNumber(0))?
+                .map(|cs| cs.value);
             Ok(Self {
                 tbs_response_data: tbs_response_data.to_vec(),
                 signature_algorithm: signature_algorithm.to_vec(),
