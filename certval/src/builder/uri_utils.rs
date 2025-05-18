@@ -64,11 +64,7 @@ fn save_certs_from_p7(
                     for (i, c) in sd.certificates.iter().enumerate() {
                         for a in c.0.iter() {
                             let f = format!("{}_{}.der", filename, i);
-                            let pb = if let Ok(pb) = PathBuf::from_str(&f) {
-                                pb
-                            } else {
-                                return false;
-                            };
+                            let Ok(pb) = PathBuf::from_str(&f);
                             if let Ok(enccert) = a.to_der() {
                                 if save_cert(
                                     pe,
